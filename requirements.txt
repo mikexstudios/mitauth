@@ -20,4 +20,4 @@
 #South
 
 #For setting up a CAS provider (for SSO logins).
--e git://github.com/Nitron/django-cas-provider.git#egg=django-cas-provider
+-e git://github.com/mikexstudios/django-cas-provider.git#egg=django-cas-provider
