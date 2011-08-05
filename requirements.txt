@@ -18,3 +18,6 @@
 
 #For easy database migrations!
 #South
+
+#For setting up a CAS provider (for SSO logins).
+-e git://github.com/Nitron/django-cas-provider.git#egg=django-cas-provider
