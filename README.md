@@ -20,27 +20,37 @@ How it works:
 ------------
 
 1.  User clicks a login link on your website. The login link sends the user to:
+
         http://thisapp.scripts.mit.edu/login?service=http://yourapp/login-callback
 
 2.  On that page, the user is redirected to the SSL version:
+
         https://thisapp.scripts.mit.edu:444/login?service=http://yourapp/login-callback
+
     and the user is prompted for his/her MIT SSL certificate.
 
-3.  The app authenticates the user by looking for the 'SSL_CLIENT_S_DN_Email' 
+3.  The app authenticates the user by looking for the `SSL_CLIENT_S_DN_Email` 
     environment variable set by Apache webserver.
 
 4.  The app then redirects the user back to your app's login callback along with
     a unique ticket string:
+
         http://yourapp/login-callback?ticket=ST-yHWJICjm7kT2DSahUYbXErPZcdelM
+
     (Note: If authentication was not successful, then no ticket is returned.)
 
 5.  Your app then calls this app with the ticket to verify that the user was 
     indeed authenticated:
+
         http://thisapp.scripts.mit.edu/validate?ticket=ST-yHWJICjm7kT2DSahUYbXErPZcdelM&service=http://yourapp/login-callback
+
     The service returns:
+
         yes
         [username]
+
     If authentication was successful. If not, the service returns:
+
         no
 
 All of this follows the standard CAS Protocol v1.0:
