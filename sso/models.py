@@ -14,5 +14,5 @@ class ServiceTicket(models.Model):
 
     def generate_ticket(self):
         r = ''.join(SystemRandom().sample(string.ascii_letters + string.digits, 29))
-        self.ticket = 'ST-' + r) # Total ticket length = 29 + 3 = 32
+        self.ticket = 'ST-%s' % r #total ticket length = 29 + 3 = 32
         self.save()
