@@ -30,6 +30,8 @@ def login(request, template_name='cas/login.html', success_redirect='/accounts/'
     #http://scripts.mit.edu/faq/15/can-i-authenticate-clients-using-mit-certificates
     email = request.META.get('SSL_CLIENT_S_DN_Email', False)
     if not email:
+        #TODO: Show error page that redirects back to original url but without
+        #      ticket parameter.
         return HttpResponse('ERROR: SSL certificate email not found!')
 
     #Pull out the username part. If the user SSL certificate was not supplied, 

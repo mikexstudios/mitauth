@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'mitauth.views.home', name='home'),
     # url(r'^mitauth/', include('mitauth.foo.urls')),
-    url(r'^cas/login/', 'sso.views.login'),
+    url(r'^cas/login/?', 'sso.views.login'),
     url(r'^cas/', include('cas_provider.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
