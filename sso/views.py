@@ -1,5 +1,4 @@
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect
 from django.http import HttpResponse
 
 from sso.models import ServiceTicket
