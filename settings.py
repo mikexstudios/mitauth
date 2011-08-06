@@ -166,3 +166,12 @@ LOGGING = {
 #LOGIN_REDIRECT_URL = '/dashboard/' #default: '/accounts/profile/'
 LOGIN_URL = '/cas/login/' #default: '/accounts/login/'
 LOGOUT_URL = '/cas/logout/' #default: '/accounts/logout/'
+
+
+
+#Import any local settings (ie. production environment) that will override
+#these development environment settings.
+try:
+    from local_settings import *
+except ImportError:
+    pass 
