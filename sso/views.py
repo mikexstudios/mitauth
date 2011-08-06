@@ -2,14 +2,11 @@ from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 
-from cas_provider.forms import LoginForm
-from cas_provider.utils import create_service_ticket
+from mitauth.models import ServiceTicket
 
 import re
 
-#This overrides django-cas-provider's login routine
-def login(request, template_name='cas/login.html', success_redirect='/accounts/'):
-    
+def login(request):
     service = request.GET.get('service', False)
     if not service:
         #TODO: Redirect to placeholder page explaining the service.
@@ -41,13 +38,33 @@ def login(request, template_name='cas/login.html', success_redirect='/accounts/'
     if email != 'scripts@mit.edu' and r:
         #Success! Now create a service ticket and redirect back to calling app.
         username = r.group(1)
-        ticket = create_service_ticket(username, service)
+
+        st = ServiceTicket(username = username, service = service)
+        st.generate_ticket()
+        st.save()
 
         new_or_append = '&' #default is append to query string
         if service.find('?') == -1:
             new_or_append = '?'
 
-        return redirect(service + new_or_append + 'ticket=' + ticket.ticket)
+        return redirect(service + new_or_append + 'ticket=' + st.ticket)
 
     #Catch-all error
     return HttpResponse('ERROR')
+
+
+def validate(request):
+    service = request.GET.get('service', False) #required by spec
+    ticket = request.GET.get('ticket', False)
+    if service and ticket_string:
+        try:
+            ticket = ServiceTicket.objects.get(ticket = ticket)
+            #TODO: Verify that provided service matches the service entered
+            #in the ticket.
+            username = ticket.username
+            ticket.delete()
+            return HttpResponse("yes\n%s\n" % username)
+        except ServiceTicket.DoesNotExist:
+            pass
+    return HttpResponse("no\n\n")
+
