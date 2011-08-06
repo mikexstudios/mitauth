@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 
-from mitauth.models import ServiceTicket
+from sso.models import ServiceTicket
 
 import re
 
@@ -56,7 +56,7 @@ def login(request):
 def validate(request):
     service = request.GET.get('service', False) #required by spec
     ticket = request.GET.get('ticket', False)
-    if service and ticket_string:
+    if service and ticket:
         try:
             ticket = ServiceTicket.objects.get(ticket = ticket)
             #TODO: Verify that provided service matches the service entered
