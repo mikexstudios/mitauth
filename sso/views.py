@@ -16,8 +16,10 @@ def login(request, template_name='cas/login.html', success_redirect='/accounts/'
         #return redirect(success_redirect)
         return HttpResponse("ERROR: 'service' key must be defined!")
 
-    #First, check that we are using SSL. If not, then redirect to SSL page
-    if not request.META.get('SSL_SESSION_ID', False):
+    #First, check that we are using SSL on the specific port 444. If not, then
+    #redirect to port 444:
+    #if not request.META.get('SSL_SESSION_ID', False):
+    if int(request.META['SERVER_PORT']) != 444:
         #Redirect the user to port :444 (assuming this is 
         #http://username.scripts.mit.edu/)
         url = 'https://%s:%i%s' % (request.META['SERVER_NAME'], 444,
