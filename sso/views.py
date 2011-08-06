@@ -10,38 +10,40 @@ import re
 #This overrides django-cas-provider's login routine
 def login(request, template_name='cas/login.html', success_redirect='/accounts/'):
     
-    #'service' GET var must be specified
-    try:
-        service = request.GET['service']
-
-        #TODO: Try to auth user
-        try:
-            email = request.META['SSL_CLIENT_S_DN_Email']
-            #Let's pull out the username part:
-            r = re.match(r'(\w+)@mit.edu', email, re.IGNORECASE)
-            #return HttpResponse(email)
-
-            if email != 'scripts@mit.edu' and r:
-                #Success!
-                username = r.group(1)
-                ticket = create_service_ticket(username, service)
-
-                if service.find('?') == -1:
-                    return redirect(service + '?ticket=' + ticket.ticket)
-                return redirect(service + '&ticket=' + ticket.ticket)
-
-        except KeyError:
-            #If that key isn't found, then it means that we are not in SSL mode.
-            #Redirect the user to port :444 (assuming this is 
-            #http://username.scripts.mit.edu/)
-            url = 'https://%s:%i%s' % (request.META['SERVER_NAME'], 444,
-                                       request.get_full_path())
-            return redirect(url)
-
-
-    except KeyError:
+    service = request.GET.get('service', False)
+    if not service:
         #TODO: Redirect to placeholder page explaining the service.
         #return redirect(success_redirect)
-        return HttpResponse('service key must be defined!')
-    
-    return HttpResponse('error')
+        return HttpResponse("ERROR: 'service' key must be defined!")
+
+    #First, check that we are using SSL. If not, then redirect to SSL page
+    if not request.META.get('SSL_SESSION_ID', False):
+        #Redirect the user to port :444 (assuming this is 
+        #http://username.scripts.mit.edu/)
+        url = 'https://%s:%i%s' % (request.META['SERVER_NAME'], 444,
+                                   request.get_full_path())
+        return redirect(url)
+
+    #Auth user using personal certificates using method described on page:
+    #http://scripts.mit.edu/faq/15/can-i-authenticate-clients-using-mit-certificates
+    email = request.META.get('SSL_CLIENT_S_DN_Email', False)
+    if not email:
+        return HttpResponse('ERROR: SSL certificate email not found!')
+
+    #Pull out the username part. If the user SSL certificate was not supplied, 
+    #then it gives a generic email like scripts@mit.edu. So we specifically
+    #check for that.
+    r = re.match(r'(\w+)@mit.edu', email, re.IGNORECASE)
+    if email != 'scripts@mit.edu' and r:
+        #Success! Now create a service ticket and redirect back to calling app.
+        username = r.group(1)
+        ticket = create_service_ticket(username, service)
+
+        new_or_append = '&' #default is append to query string
+        if service.find('?') == -1:
+            new_or_append = '?'
+
+        return redirect(service + new_or_append + 'ticket=' + ticket.ticket)
+
+    #Catch-all error
+    return HttpResponse('ERROR')
